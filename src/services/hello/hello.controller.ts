@@ -7,6 +7,6 @@ export class HelloController {
 
   @Get()
   HelloWorld() {
-    return { message: 'Hello WWorld from the back' };
+    return this.helloService.say();
   }
 }
