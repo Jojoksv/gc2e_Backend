@@ -11,6 +11,7 @@ console.log(origin);
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -18,13 +19,16 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
   app.use(cookieParser());
+
   app.enableCors({
-    origin: "https://genie-construction-eben-ezer.vercel.app",
-    credentials: true,
-    allowedHeaders: "Content-Type, Authorization",  // En-têtes autorisés
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    origin: 'https://genie-construction-eben-ezer.vercel.app', // Ton frontend spécifique
+    methods: 'GET,POST,PUT,DELETE,OPTIONS', // Méthodes autorisées
+    allowedHeaders: 'Content-Type, Authorization', // En-têtes autorisés
+    credentials: true, // Permet l'envoi et la réception des cookies
   });
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
