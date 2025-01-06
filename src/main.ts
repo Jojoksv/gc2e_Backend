@@ -24,7 +24,7 @@ async function bootstrap() {
   app.use(cookieParser());
 
   app.use(function (request: Request, response: Response, next: NextFunction) {
-    response.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+    response.setHeader('Access-Control-Allow-Origin', 'https://genie-construction-eben-ezer.vercel.app');
     next();
   });
 
