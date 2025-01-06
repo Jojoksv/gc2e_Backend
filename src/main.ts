@@ -7,6 +7,7 @@ const ENV = process.env.NODE_ENV;
 const front_URL = process.env.FRONTEND_URL;
 
 const origin = ENV === 'PROD' ? front_URL : 'https://localhost:5174';
+console.log(origin);
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -21,6 +22,7 @@ async function bootstrap() {
   app.enableCors({
     origin: origin,
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
   });
   await app.listen(process.env.PORT ?? 3000);
 }
