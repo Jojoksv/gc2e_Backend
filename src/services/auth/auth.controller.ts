@@ -11,11 +11,10 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from '../../guards/jwt.auth.guard';
-import { CreateUser, RequestWithUser } from 'src/types/types';
+import { CreateUser } from 'src/types/types';
 import { UserService } from '../user/user.service';
-import { LoginDto } from 'src/dtos/loginDTO';
 import { RateLimit } from 'nestjs-rate-limiter';
-import { TokenFromCookie } from 'src/decorators/extract-token.decorator';
+import { LoginDto } from 'src/dtos/loginDTO';
 
 @Controller('auth')
 export class AuthController {
