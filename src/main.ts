@@ -20,9 +20,9 @@ async function bootstrap() {
   );
   app.use(cookieParser());
   app.enableCors({
-    origin: origin,
+    origin: '*',
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   });
   await app.listen(process.env.PORT ?? 3000);
 }
