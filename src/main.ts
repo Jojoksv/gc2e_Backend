@@ -22,6 +22,7 @@ async function bootstrap() {
   app.enableCors({
     origin: "https://genie-construction-eben-ezer.vercel.app",
     credentials: true,
+    allowedHeaders: "Content-Type, Authorization",  // En-têtes autorisés
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   });
   await app.listen(process.env.PORT ?? 3000);
