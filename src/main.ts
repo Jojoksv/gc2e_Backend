@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
+import { NextFunction, Response } from 'express';
 
 const ENV = process.env.NODE_ENV;
 const front_URL = process.env.FRONTEND_URL;
@@ -22,10 +23,15 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
+  app.use(function (request: Request, response: Response, next: NextFunction) {
+    response.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+    next();
+  });
+
   app.enableCors({
     origin: 'https://genie-construction-eben-ezer.vercel.app', // Ton frontend spécifique
     methods: 'GET,POST,PUT,DELETE,OPTIONS', // Méthodes autorisées
-    allowedHeaders: 'Content-Type, Authorization', // En-têtes autorisés
+    allowedHeaders: 'Content-Type, Authorization, Accept', // En-têtes autorisés
     credentials: true, // Permet l'envoi et la réception des cookies
   });
 
