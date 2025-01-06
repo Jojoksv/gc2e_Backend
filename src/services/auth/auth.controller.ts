@@ -14,7 +14,7 @@ import { JwtAuthGuard } from '../../guards/jwt.auth.guard';
 import { CreateUser } from 'src/types/types';
 import { UserService } from '../user/user.service';
 import { RateLimit } from 'nestjs-rate-limiter';
-import { LoginDto } from 'src/dtos/loginDTO';
+import { LoginDto } from '../../dtos/loginDTO';
 
 @Controller('auth')
 export class AuthController {
