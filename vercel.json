@@ -9,7 +9,7 @@
       }
     }
   ],
-  "rewrites": [{ "source": "/(.*)", "destination": "/src/main.ts" }],
+  "rewrites": [{ "source": "/(.*)", "destination": "src/main.ts" }],
   "routes": [
     {
       "src": "/(.*)",
