@@ -6,6 +6,7 @@ import { HelloModule } from './services/hello/hello.module';
 
 @Module({
   imports: [
+    HelloModule,
     AuthModule,
     UserModule,
     RateLimiterModule.register({
@@ -13,7 +14,6 @@ import { HelloModule } from './services/hello/hello.module';
       duration: 10,
       blockDuration: 60 * 15,
     }),
-    HelloModule,
   ],
   controllers: [],
   providers: [],
