@@ -23,6 +23,11 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    console.log('Request Headers:', req.headers);
+    next();
+  });
+
   app.enableCors({
     origin: ['https://genie-construction-eben-ezer.vercel.app'], // Frontend autorisé
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Méthodes autorisées
@@ -30,22 +35,22 @@ async function bootstrap() {
     credentials: true, // Autoriser les cookies
   });
 
-  app.use(function (req: Request, res: Response, next: NextFunction) {
-    if (req.method === 'OPTIONS') {
-      res.header(
-        'Access-Control-Allow-Origin',
-        'https://genie-construction-eben-ezer.vercel.app',
-      );
-      res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-      res.header(
-        'Access-Control-Allow-Headers',
-        'Content-Type, Authorization, Accept',
-      );
-      res.header('Access-Control-Allow-Credentials', 'true');
-      return res.status(200).json({});
-    }
-    next();
-  });
+  // app.use(function (req: Request, res: Response, next: NextFunction) {
+  //   if (req.method === 'OPTIONS') {
+  //     res.header(
+  //       'Access-Control-Allow-Origin',
+  //       'https://genie-construction-eben-ezer.vercel.app',
+  //     );
+  //     res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  //     res.header(
+  //       'Access-Control-Allow-Headers',
+  //       'Content-Type, Authorization, Accept',
+  //     );
+  //     res.header('Access-Control-Allow-Credentials', 'true');
+  //     return res.status(200).json({});
+  //   }
+  //   next();
+  // });
 
   await app.listen(process.env.PORT ?? 3000);
 }
