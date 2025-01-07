@@ -48,6 +48,7 @@ async function bootstrap() {
         callback(null, true);
       } else {
         console.log('CORS bloqué pour:', origin);
+        callback(new Error('Not allowed by CORS'));
       }
     },
     methods: 'GET, PUT, POST, DELETE, OPTIONS',
