@@ -25,13 +25,13 @@ async function bootstrap() {
 
   if (ENV === 'PROD') {
     app.use((req: Request, res: Response, next: NextFunction) => {
-      console.log('Request Headers:', req.headers);
+      console.log('Request Headers:', req);
       next();
     });
   }
 
   app.enableCors({
-    origin: 'https://genie-construction-eben-ezer.vercel.app',
+    origin: ['https://genie-construction-eben-ezer.vercel.app'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
   });
