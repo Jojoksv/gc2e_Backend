@@ -31,7 +31,7 @@ async function bootstrap() {
   }
 
   app.enableCors({
-    origin: 'https://genie-construction-eben-ezer.vercel.app/',
+    origin: 'https://genie-construction-eben-ezer.vercel.app',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
   });
