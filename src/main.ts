@@ -53,7 +53,6 @@ async function bootstrap() {
   app.enableCors({
     origin: ['https://genie-construction-eben-ezer.vercel.app/'], // Frontend autorisé
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Méthodes autorisées
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'], // En-têtes autorisés
     credentials: true, // Autoriser les cookies
   });
 
