@@ -30,25 +30,30 @@ async function bootstrap() {
   }
 
   var whitelist = ['https://genie-construction-eben-ezer.vercel.app'];
-  app.enableCors({
-    origin: function (origin, callback) {
-      console.log('Origine de la requête:', origin); // Affiche l'origine
-      if (origin === undefined) {
-        console.log('Aucune origine définie dans la requête.');
-      }
-      if (whitelist.indexOf(origin) !== -1) {
-        console.log('CORS autorisé pour:', origin);
-        callback(null, true);
-      } else {
-        console.log('CORS bloqué pour:', origin);
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-    allowedHeaders:
-      'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Observe',
-    methods: 'GET,PUT,POST,DELETE,UPDATE,OPTIONS',
-    credentials: true,
-  });
+
+app.enableCors({
+  origin: function (origin, callback) {
+    console.log('Origine de la requête:', origin); // Affiche l'origine de la requête
+
+    // Vérifie si l'origine est définie
+    if (origin === undefined) {
+      console.log('Aucune origine définie dans la requête.');
+    }
+
+    // Vérifie si l'origine est dans la whitelist
+    if (whitelist.indexOf(origin) !== -1) {
+      console.log('CORS autorisé pour:', origin);
+      callback(null, true); // Autorise la requête
+    } else {
+      console.log('CORS bloqué pour:', origin);
+      callback(new Error('Not allowed by CORS')); // Bloque la requête si l'origine n'est pas autorisée
+    }
+  },
+  allowedHeaders: 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Observe', // En-têtes autorisés
+  methods: 'GET,PUT,POST,DELETE,UPDATE,OPTIONS', // Méthodes HTTP autorisées
+  credentials: true, // Autorise l'envoi des cookies avec la requête
+});
+
 
   await app.listen(process.env.PORT ?? 3000);
 }
