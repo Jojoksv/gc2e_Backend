@@ -31,27 +31,17 @@ async function bootstrap() {
 
   var whitelist = ['https://genie-construction-eben-ezer.vercel.app'];
 
-app.enableCors({
-  origin: function (origin, callback) {
-    console.log('Origine de la requête:', origin); // Affiche l'origine de la requête
-
-    // Vérifie si l'origine est définie
-    if (origin === undefined) {
-      console.log('Aucune origine définie dans la requête.');
-    }
-
-    // Vérifie si l'origine est dans la whitelist
-    if (whitelist.indexOf(origin) !== -1) {
-      console.log('CORS autorisé pour:', origin);
-      callback(null, true); // Autorise la requête
-    } else {
-      console.log('CORS bloqué pour:', origin);
-      callback(new Error('Not allowed by CORS')); // Bloque la requête si l'origine n'est pas autorisée
-    }
-  },
+  app.enableCors({
+    origin: function (origin, callback) {
+      if (!origin || whitelist.indexOf(origin) !== -1) {
+        callback(null, true)
+      } else {
+        callback(new Error('Not allowed by CORS'))
+      }
+    },
   allowedHeaders: 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Observe', // En-têtes autorisés
   methods: 'GET,PUT,POST,DELETE,UPDATE,OPTIONS', // Méthodes HTTP autorisées
-  credentials: true, // Autorise l'envoi des cookies avec la requête
+  // credentials: true,
 });
 
 
