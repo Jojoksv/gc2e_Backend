@@ -24,10 +24,15 @@ async function bootstrap() {
 
   if (ENV === 'PROD') {
     app.use((req: Request, res: Response, next: NextFunction) => {
-      console.log('Request Headers:', req);
+      console.log('Request:', req);
       next();
     });
   }
+
+  app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Credentials', 'true');
+    next();
+  });
 
   var whitelist = ['https://genie-construction-eben-ezer.vercel.app'];
 
@@ -43,21 +48,13 @@ async function bootstrap() {
         callback(null, true);
       } else {
         console.log('CORS bloqué pour:', origin);
-        callback(new Error('Not allowed by CORS'));
       }
     },
-    allowedHeaders:
-      'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Observe',
-    methods: 'GET,PUT,POST,DELETE,UPDATE,OPTIONS',
-    // credentials: true,
-    preflightContinue: false, // Pré-faites les pré-vérifications si nécessaire
-    maxAge: 86400, // Délai de mise en cache de la pré-vérification
-  });
-
-  app.use((req, res, next) => {
-    // Ajoutez l'en-tête Access-Control-Allow-Credentials
-    res.header('Access-Control-Allow-Credentials', 'true');
-    next();
+    methods: 'GET, PUT, POST, DELETE, OPTIONS',
+    allowedHeaders: 'X-Requested-With, Content-Type, Accept, Observe',
+    credentials: true,
+    preflightContinue: false,
+    maxAge: 86400,
   });
 
   await app.listen(process.env.PORT ?? 3000);
