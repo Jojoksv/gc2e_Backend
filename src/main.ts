@@ -10,7 +10,6 @@ const front_URL = process.env.FRONTEND_URL || 'https://localhost:5174';
 const origin = ENV === 'PROD' ? front_URL : 'https://localhost:5174';
 
 async function bootstrap() {
-
   const app = await NestFactory.create(AppModule);
 
   app.useGlobalPipes(
@@ -33,11 +32,15 @@ async function bootstrap() {
   var whitelist = ['https://genie-construction-eben-ezer.vercel.app'];
   app.enableCors({
     origin: function (origin, callback) {
+      console.log('Origine de la requête:', origin); // Affiche l'origine
+      if (origin === undefined) {
+        console.log('Aucune origine définie dans la requête.');
+      }
       if (whitelist.indexOf(origin) !== -1) {
-        console.log('allowed cors for:', origin);
+        console.log('CORS autorisé pour:', origin);
         callback(null, true);
       } else {
-        console.log('blocked cors for:', origin);
+        console.log('CORS bloqué pour:', origin);
         callback(new Error('Not allowed by CORS'));
       }
     },
