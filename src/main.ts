@@ -49,7 +49,7 @@ async function bootstrap() {
     allowedHeaders:
       'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Observe',
     methods: 'GET,PUT,POST,DELETE,UPDATE,OPTIONS',
-    credentials: true, // Autorise les cookies dans les requêtes
+    // credentials: true,
     preflightContinue: false, // Pré-faites les pré-vérifications si nécessaire
     maxAge: 86400, // Délai de mise en cache de la pré-vérification
   });
