@@ -23,17 +23,19 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
+  app.enableCors();
+
   app.use((req: Request, res: Response, next: NextFunction) => {
     console.log('Request Headers:', req.headers);
     next();
   });
 
-  app.enableCors({
-    origin: ['https://genie-construction-eben-ezer.vercel.app'], // Frontend autorisé
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Méthodes autorisées
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'], // En-têtes autorisés
-    credentials: true, // Autoriser les cookies
-  });
+  // app.enableCors({
+  //   origin: ['https://genie-construction-eben-ezer.vercel.app'], // Frontend autorisé
+  //   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Méthodes autorisées
+  //   allowedHeaders: ['Content-Type', 'Authorization', 'Accept'], // En-têtes autorisés
+  //   credentials: true, // Autoriser les cookies
+  // });
 
   // app.use(function (req: Request, res: Response, next: NextFunction) {
   //   if (req.method === 'OPTIONS') {
