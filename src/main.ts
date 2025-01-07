@@ -11,9 +11,7 @@ const front_URL = process.env.FRONTEND_URL || 'https://localhost:5174';
 const origin = ENV === 'PROD' ? front_URL : 'https://localhost:5174';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, new ExpressAdapter(), {
-    cors: true,
-  });
+  const app = await NestFactory.create(AppModule);
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -33,7 +31,7 @@ async function bootstrap() {
   }
 
   app.enableCors({
-    origin: '*',
+    origin: 'https://genie-construction-eben-ezer.vercel.app/',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
   });
