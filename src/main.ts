@@ -39,6 +39,14 @@ async function bootstrap() {
     next();
   });
 
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    if (req.method === 'OPTIONS') {
+      res.status(204).send(); // Répond avec 204 No Content
+    } else {
+      next(); // Continue vers d'autres middlewares
+    }
+  });
+
   // Middleware for logging requests
   app.use((req: Request, res: Response, next: NextFunction) => {
     console.log(`[${req.method}] ${req.url}`);
