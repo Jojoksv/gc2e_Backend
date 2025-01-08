@@ -31,7 +31,7 @@ export class AuthController {
   async login(@Body() loginData: LoginDto, @Res() res: any) {
     try {
       this.logger.log(
-        `Tentative de connexion pour l'utilisateur ${loginData.username}`,
+        `Tentative de connexion pour l'utilisateur ${loginData.email}`,
       );
       const { access_token } = await this.authService.login({ loginData });
 
