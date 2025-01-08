@@ -2,7 +2,6 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
-import { Request, Response, NextFunction } from 'express';
 
 const ENV = process.env.NODE_ENV;
 const front_URL = process.env.FRONTEND_URL;
@@ -28,6 +27,8 @@ async function bootstrap() {
   app.enableCors({
     origin: origin,
     credentials: true,
+    methods: 'GET, PUT, POST, DELETE, OPTIONS',
+    allowedHeaders: 'X-Requested-With, Content-Type, Accept, Observe',
   });
 
   await app.listen(process.env.PORT ?? 3000);
