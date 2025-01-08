@@ -7,6 +7,7 @@ import {
   Post,
   Req,
   Res,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -15,6 +16,7 @@ import { CreateUser } from 'src/types/types';
 import { UserService } from '../user/user.service';
 import { RateLimit } from 'nestjs-rate-limiter';
 import { LoginDto } from '../../dtos/loginDTO';
+import { Logger } from '@nestjs/common';
 
 @Controller('auth')
 export class AuthController {
@@ -23,20 +25,30 @@ export class AuthController {
     private readonly userService: UserService,
   ) {}
 
-  @HttpCode(HttpStatus.OK)
+  logger = new Logger('AuthController');
+
   @Post('login')
-  @RateLimit({ points: 5, duration: 10 })
   async login(@Body() loginData: LoginDto, @Res() res: any) {
-    const { access_token } = await this.authService.login({ loginData });
+    try {
+      this.logger.log(
+        `Tentative de connexion pour l'utilisateur ${loginData.username}`,
+      );
+      const { access_token } = await this.authService.login({ loginData });
 
-    res.cookie('access_token', access_token, {
-      httpOnly: true, // Empêche l'accès via JavaScript
-      secure: process.env.NODE_ENV === 'PROD', // Seulement en HTTPS en production
-      sameSite: 'strict', // Empêche les attaques CSRF
-      maxAge: 24 * 60 * 60 * 1000, // Expiration dans 24 heures
-    });
+      res.cookie('access_token', access_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'PROD',
+        sameSite: 'none',
+        maxAge: 24 * 60 * 60 * 1000,
+      });
 
-    return res.send({ message: 'Connexion réussie !' });
+      return res.send({ message: 'Connexion réussie !' });
+    } catch (error) {
+      this.logger.error('Erreur lors de la connexion', error);
+      throw new UnauthorizedException(
+        'Échec de connexion. Vérifiez vos identifiants.',
+      );
+    }
   }
 
   @HttpCode(HttpStatus.OK)
@@ -49,14 +61,13 @@ export class AuthController {
     const { access_token } = await this.authService.register({ registerData });
 
     res.cookie('access_token', access_token, {
-      httpOnly: true, // Empêche l'accès via JavaScript
-      secure: process.env.NODE_ENV === 'PROD', // Seulement en HTTPS en production
-      sameSite: 'strict', // Empêche les attaques CSRF
-      maxAge: 24 * 60 * 60 * 1000, // Expiration dans 24 heures
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'PROD',
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000,
     });
 
     return res.send({ message: 'Inscription réussie !' });
-    // return this.authService.register({ registerData });
   }
 
   @UseGuards(JwtAuthGuard)
