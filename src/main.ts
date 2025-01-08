@@ -45,6 +45,19 @@ async function bootstrap() {
     next();
   });
 
+  // Middleware pour gérer OPTIONS
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    if (req.method === 'OPTIONS') {
+      res.header('Access-Control-Allow-Origin', 'https://genie-construction-eben-ezer.vercel.app');
+      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      res.header('Access-Control-Allow-Credentials', 'true');
+      res.status(204).send(); // Réponse vide pour OPTIONS
+    } else {
+      next();
+    }
+  });
+
   await app.listen(process.env.PORT ?? 3000);
 }
 
