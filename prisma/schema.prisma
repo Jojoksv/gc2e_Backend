@@ -14,3 +14,18 @@ model User {
   password String
   role     String @default("user")
 }
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  price       Float
+  oldPrice    Float
+  category    String
+  rating      Float
+  reviews     Int
+  description String
+  features    String[]
+  images      String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
