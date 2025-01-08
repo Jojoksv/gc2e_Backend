@@ -5,7 +5,7 @@ import cookieParser from 'cookie-parser';
 import { Request, Response, NextFunction } from 'express';
 
 const ENV = process.env.NODE_ENV || 'DEV';
-const front_URL = process.env.FRONTEND_URL || 'https://localhost:5174';
+const front_URL = process.env.FRONTEND_URL;
 
 const origin = ENV === 'PROD' ? front_URL : 'https://localhost:5174';
 
