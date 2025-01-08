@@ -4,7 +4,6 @@ const prisma = new PrismaClient();
 
 const products = [
   {
-    id: 1,
     name: 'Portail Métallique Modern',
     price: 1299,
     oldPrice: 3000,
@@ -23,7 +22,6 @@ const products = [
     images: ['portail', 'porte1', 'portail'],
   },
   {
-    id: 2,
     name: 'Chaise Design Métal',
     price: 299,
     oldPrice: 300,
@@ -42,7 +40,6 @@ const products = [
     images: ['fauteuilSeul', 'fauteuilGroupe', 'fauteuilSeul'],
   },
   {
-    id: 3,
     name: 'Table Banc',
     price: 599,
     oldPrice: 800,
@@ -61,7 +58,6 @@ const products = [
     images: ['tableBanc', 'tableBanc', 'tableBanc'],
   },
   {
-    id: 4,
     name: 'Armoire Métallique',
     price: 449,
     oldPrice: 600,
@@ -80,7 +76,6 @@ const products = [
     images: ['armoire', 'armoireOuverte', 'armoire'],
   },
   {
-    id: 5,
     name: 'Porte en Métal Lourd',
     price: 2499,
     oldPrice: 3000,
@@ -99,7 +94,6 @@ const products = [
     images: ['porte1', 'portail', 'porte1'],
   },
   {
-    id: 6,
     name: 'Balançoire de Jardin',
     price: 399,
     oldPrice: 500,
@@ -118,7 +112,6 @@ const products = [
     images: ['balancoire', 'balancoire1', 'balancoire'],
   },
   {
-    id: 7,
     name: 'Grillage à Motif Architectural',
     price: 399,
     oldPrice: 500,
@@ -137,7 +130,6 @@ const products = [
     images: ['grillageMotif', 'grillageMotif', 'grillageMotif'],
   },
   {
-    id: 8,
     name: 'Portes à Design Architectural Multiple',
     price: 399,
     oldPrice: 500,
@@ -156,7 +148,6 @@ const products = [
     images: ['multiPorte', 'multiPorte', 'multiPorte'],
   },
   {
-    id: 9,
     name: 'Chaises et Table en Acier',
     price: 399,
     oldPrice: 500,
@@ -182,22 +173,22 @@ const products = [
 
 async function main() {
   // Insertion des utilisateurs
-  await prisma.user.createMany({
-    data: [
-      {
-        email: 'jkossouvi@gmail.com',
-        name: 'Joseph Kossouvi',
-        password: 'Zougrane@23',
-        role: 'admin',
-      },
-      {
-        email: 'josephkossouvi488@gmail.com',
-        name: 'Jojo Dxpe',
-        password: 'JojoDxpe23',
-        role: 'user',
-      },
-    ],
-  });
+  // await prisma.user.createMany({
+  //   data: [
+  //     {
+  //       email: 'jkossouvi@gmail.com',
+  //       name: 'Joseph Kossouvi',
+  //       password: 'Zougrane@23',
+  //       role: 'admin',
+  //     },
+  //     {
+  //       email: 'josephkossouvi488@gmail.com',
+  //       name: 'Jojo Dxpe',
+  //       password: 'JojoDxpe23',
+  //       role: 'user',
+  //     },
+  //   ],
+  // });
 
   for (const product of products) {
     await prisma.product.create({
