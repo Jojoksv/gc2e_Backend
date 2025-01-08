@@ -30,7 +30,19 @@ async function bootstrap() {
   }
 
   app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Origin', 'https://genie-construction-eben-ezer.vercel.app');
+    console.log('Res header:', res.header);
+    next();
+  });
+
+  app.use((req, res, next) => {
+    if (req.method === 'OPTIONS') {
+      res.header('Access-Control-Allow-Origin', 'https://genie-construction-eben-ezer.vercel.app');
+      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      res.header('Access-Control-Allow-Credentials', 'true');
+      return res.status(204).end(); // Fin de la réponse pour OPTIONS
+    }
     next();
   });
 
