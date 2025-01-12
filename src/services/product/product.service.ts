@@ -11,7 +11,13 @@ import { PrismaService } from '../prisma.service';
 export class ProductService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createProduct(createProductDto: CreateProductDto) {
+  async createProduct({
+    createProductDto,
+    images,
+  }: {
+    createProductDto: CreateProductDto;
+    images: any;
+  }) {
     const {
       name,
       price,
@@ -21,7 +27,6 @@ export class ProductService {
       reviews = 0,
       description,
       features,
-      images,
     } = createProductDto;
 
     // Validation métier : vérifier si le produit existe déjà
@@ -47,7 +52,7 @@ export class ProductService {
           reviews,
           description,
           features,
-          images,
+          images: { set: images },
         },
       });
     });

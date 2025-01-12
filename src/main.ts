@@ -2,11 +2,9 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
-
-const ENV = process.env.NODE_ENV;
-const front_URL = process.env.FRONTEND_URL;
-
-const origin = ENV === 'PROD' ? front_URL : 'https://localhost:5174';
+import * as express from 'express';
+import { join } from 'path';
+import { origin } from './config/constants';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -19,6 +17,8 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  app.use(express.static(join(process.cwd(), './uploads')));
 
   // Cookie parser
   app.use(cookieParser());

@@ -1,3 +1,4 @@
+import { Transform, Type } from 'class-transformer';
 import {
   IsString,
   IsNotEmpty,
@@ -8,9 +9,8 @@ import {
   IsIn,
   MaxLength,
   Min,
-  Max,
-  ArrayMinSize,
 } from 'class-validator';
+import { HasMimeType, IsFile } from 'nestjs-form-data';
 
 export class CreateProductDto {
   @IsString()
@@ -20,6 +20,7 @@ export class CreateProductDto {
   })
   name: string;
 
+  @Type(() => Number) // Transforme la chaîne en nombre
   @IsNumber(
     { allowNaN: false, allowInfinity: false },
     { message: 'Le prix doit être un nombre valide.' },
@@ -27,6 +28,7 @@ export class CreateProductDto {
   @IsPositive({ message: 'Le prix doit être un nombre positif.' })
   price: number;
 
+  @Type(() => Number) // Transforme la chaîne en nombre
   @IsNumber(
     { allowNaN: false, allowInfinity: false },
     { message: 'L’ancien prix doit être un nombre valide.' },
@@ -54,19 +56,8 @@ export class CreateProductDto {
   )
   category: string;
 
-  @IsNumber(
-    { allowNaN: false, allowInfinity: false },
-    { message: 'La note doit être un nombre valide.' },
-  )
-  @Min(0, { message: 'La note minimale est 0.' })
-  @Max(5, { message: 'La note maximale est 5.' })
   rating: number;
 
-  @IsNumber(
-    { allowNaN: false, allowInfinity: false },
-    { message: 'Le nombre d’avis doit être un entier valide.' },
-  )
-  @Min(0, { message: 'Le nombre d’avis doit être au minimum 0.' })
   reviews: number;
 
   @IsString()
@@ -76,23 +67,27 @@ export class CreateProductDto {
   })
   description: string;
 
-  @IsArray({
-    message: 'Les fonctionnalités doivent être un tableau de chaînes.',
-  })
-  @ArrayMinSize(1, { message: 'Au moins une fonctionnalité est requise.' })
+  @IsArray({ message: 'Les fonctionnalités doivent être un tableau.' })
   @IsString({
     each: true,
     message: 'Chaque fonctionnalité doit être une chaîne valide.',
   })
+  @Transform(({ value }) => {
+    // Si la valeur est une chaîne, on la convertit en tableau
+    if (typeof value === 'string') {
+      return value.split(',').map((feature) => feature.trim());
+    }
+    // Si la valeur est déjà un tableau, on le retourne tel quel
+    if (Array.isArray(value)) {
+      return value.map((feature) => feature.trim());
+    }
+    // Sinon, on retourne un tableau vide ou lève une erreur
+    return [];
+  })
   features: string[];
 
-  @IsArray({ message: 'Les images doivent être un tableau de chaînes.' })
-  @ArrayMinSize(1, { message: 'Au moins une image est requise.' })
-  @IsString({
-    each: true,
-    message:
-      'Chaque image doit être une chaîne valide représentant un chemin ou une URL.',
-  })
   @IsOptional()
-  images?: string[];
+  @IsFile()
+  @HasMimeType(['image/jpeg', 'image/png', 'image/jpg'])
+  images?: any;
 }
