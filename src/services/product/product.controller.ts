@@ -13,11 +13,11 @@ import {
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import path, { extname } from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
-import { memoryStorage } from 'multer';
+import { diskStorage, memoryStorage } from 'multer';
 
 @Controller('product')
 export class ProductController {
@@ -104,9 +104,46 @@ export class ProductController {
     return this.productService.findOne(id);
   }
 
+  // @Put(':id')
+  // update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
+  //   return this.productService.update(id, updateProductDto);
+  // }
+
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productService.update(id, updateProductDto);
+  @UseInterceptors(
+    FilesInterceptor('images', 5, {
+      storage: diskStorage({
+        destination: './uploads', // Le dossier où les fichiers seront stockés
+        filename: (req, file, cb) => {
+          const uniqueSuffix = uuidv4() + extname(file.originalname);
+          cb(null, uniqueSuffix); // Nom unique généré pour chaque fichier
+        },
+      }),
+      fileFilter: (req, file, cb) => {
+        const allowedTypes = /jpeg|jpg|png/;
+        const ext = allowedTypes.test(extname(file.originalname).toLowerCase());
+        const mime = allowedTypes.test(file.mimetype);
+
+        if (ext && mime) {
+          cb(null, true); // Fichier accepté
+        } else {
+          cb(new Error('Type de fichier non supporté'), false); // Fichier non accepté
+        }
+      },
+    }),
+  )
+  update(
+    @Param('id') id: string,
+    @Body() updateProductDto: UpdateProductDto,
+    @UploadedFiles() files: Express.Multer.File[], // Capture les fichiers envoyés
+  ) {
+    const uploadedFilePaths: string[] = files.map((file) => file.filename);
+
+    return this.productService.update({
+      id,
+      updateProductDto,
+      images: uploadedFilePaths,
+    });
   }
 
   @Delete(':id')

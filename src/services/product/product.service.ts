@@ -100,7 +100,26 @@ export class ProductService {
   }
 
   // Méthode pour mettre à jour un produit
-  async update(id: string, updateProductDto: UpdateProductDto) {
+  async update({
+    id,
+    updateProductDto,
+    images,
+  }: {
+    id: string;
+    updateProductDto: UpdateProductDto;
+    images: any;
+  }) {
+    const {
+      name,
+      price,
+      oldPrice,
+      category,
+      rating = 0,
+      reviews = 0,
+      description,
+      features,
+    } = updateProductDto;
+
     try {
       const product = await this.prisma.product.findUnique({
         where: { id },
@@ -112,7 +131,17 @@ export class ProductService {
 
       const updatedProduct = await this.prisma.product.update({
         where: { id },
-        data: updateProductDto,
+        data: {
+          name,
+          price,
+          oldPrice,
+          category,
+          rating,
+          reviews,
+          description,
+          features,
+          images: { set: images },
+        },
       });
 
       return {
