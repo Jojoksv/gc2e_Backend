@@ -9,6 +9,7 @@ import { CreateUser, UserPayload } from '../../types/types';
 import { RateLimiterMemory } from 'rate-limiter-flexible';
 import { compare, hash } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { UpdateUserDto } from 'src/dtos/updateUserDTO';
 
 const limiter = new RateLimiterMemory({
   points: 5,
@@ -104,5 +105,20 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign(payload),
     };
+  }
+
+  async updateUser(userId: string, updateData: UpdateUserDto) {
+    // Vérifier si l'utilisateur existe
+    const userExists = await this.prisma.user.findUnique({ where: { id: userId } });
+
+    if (!userExists) {
+      throw new NotFoundException('Utilisateur introuvable.');
+    }
+
+    // Mettre à jour l'utilisateur
+    return await this.prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+    });
   }
 }

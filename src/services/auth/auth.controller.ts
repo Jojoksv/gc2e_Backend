@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Put,
   Req,
   Res,
   UnauthorizedException,
@@ -17,6 +18,7 @@ import { UserService } from '../user/user.service';
 import { RateLimit } from 'nestjs-rate-limiter';
 import { LoginDto } from '../../dtos/loginDTO';
 import { Logger } from '@nestjs/common';
+import { UpdateUserDto } from 'src/dtos/updateUserDTO';
 
 @Controller('auth')
 export class AuthController {
@@ -76,5 +78,26 @@ export class AuthController {
     return await this.userService.getUser({
       userId: request.user.userId,
     });
+  }
+
+  @Put('update')
+  @UseGuards(JwtAuthGuard)
+  async updateUser(@Req() req: any, @Body() updateData: UpdateUserDto) {
+    const userId = req.user.userId;
+
+    // Récupérer les infos actuelles de l'utilisateur
+    const currentUser = await this.userService.getUser({ userId });
+
+    if (!currentUser) {
+      throw new UnauthorizedException("Utilisateur non trouvé.");
+    }
+
+    // Vérifier que l'email et le rôle envoyés correspondent à l'utilisateur actuel
+    if (updateData.email !== currentUser.email || updateData.role !== currentUser.role) {
+      throw new UnauthorizedException("Vous ne pouvez pas modifier l'email ou le rôle.");
+    }
+
+    // Mise à jour des informations utilisateur
+    return await this.authService.updateUser(userId, updateData);
   }
 }
