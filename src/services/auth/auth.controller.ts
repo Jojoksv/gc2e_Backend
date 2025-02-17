@@ -18,7 +18,7 @@ import { UserService } from '../user/user.service';
 import { RateLimit } from 'nestjs-rate-limiter';
 import { LoginDto } from '../../dtos/loginDTO';
 import { Logger } from '@nestjs/common';
-import { UpdateUserDto } from 'src/dtos/updateUserDTO';
+import { UpdateUserDto } from '../../dtos/updateUserDTO';
 
 @Controller('auth')
 export class AuthController {
