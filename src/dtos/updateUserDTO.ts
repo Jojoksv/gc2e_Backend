@@ -25,6 +25,7 @@ export class UpdateUserDto {
   @IsString()
   city?: string;
 
+  @IsOptional()
   @IsString()
   role?: string;
 
