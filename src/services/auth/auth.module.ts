@@ -6,6 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './constants';
 import { JwtStrategy } from './jwt.strategy';
 import { UserService } from '../user/user.service';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -13,6 +14,9 @@ import { UserService } from '../user/user.service';
       global: true,
       secret: jwtConstants.secret,
       signOptions: { expiresIn: 2592000 },
+    }),
+    ConfigModule.forRoot({
+      isGlobal: true,
     }),
   ],
   controllers: [AuthController],
