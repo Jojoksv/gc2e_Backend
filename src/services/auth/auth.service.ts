@@ -9,7 +9,7 @@ import { CreateUser, UserPayload } from '../../types/types';
 import { RateLimiterMemory } from 'rate-limiter-flexible';
 import { compare, hash } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { UpdateUserDto } from 'src/dtos/updateUserDTO';
+import { UpdateUserDto } from '../../dtos/updateUserDTO';
 
 const limiter = new RateLimiterMemory({
   points: 5,
