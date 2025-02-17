@@ -39,9 +39,9 @@ export class AuthController {
 
       res.cookie('access_token', access_token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'PROD',
-        sameSite: 'none',
-        maxAge: 24 * 60 * 60 * 1000,
+        secure: process.env.NODE_ENV === 'PROD' ? true : false,
+        sameSite: process.env.NODE_ENV === 'PROD' ? 'none' : 'lax',
+        maxAge: 30 * 24 * 60 * 60 * 1000,
       });
 
       return res.send({ message: 'Connexion réussie !' });
@@ -64,9 +64,9 @@ export class AuthController {
 
     res.cookie('access_token', access_token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'PROD',
-      sameSite: 'strict',
-      maxAge: 24 * 60 * 60 * 1000,
+      secure: process.env.NODE_ENV === 'DEV',
+      sameSite: 'none',
+      maxAge: 30 * 24 * 60 * 60 * 1000,
     });
 
     return res.send({ message: 'Inscription réussie !' });

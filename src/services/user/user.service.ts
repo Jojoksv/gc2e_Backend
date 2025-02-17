@@ -3,7 +3,8 @@ import { PrismaService } from '../prisma.service';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService,
+  ) {}
 
   async getUser({ userId }: { userId: string }) {
     const user = await this.prisma.user.findUnique({
@@ -19,5 +20,13 @@ export class UserService {
     });
 
     return user;
+  }
+
+  async findAll() {
+    try {
+      return await this.prisma.user.findMany();
+    } catch (error) {
+      throw new Error('Erreur lors de la récupération des utilisateurs');
+    }
   }
 }
