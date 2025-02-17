@@ -55,7 +55,7 @@ export class ProductController {
     try {
       files.forEach((file) => {
         const uniqueSuffix = uuidv4() + extname(file.originalname);
-        const uploadPath = path.join('./uploads', uniqueSuffix);
+        const uploadPath = path.join('./tmp/uploads', uniqueSuffix);
 
         // Sauvegarde du fichier sur disque
         fs.writeFileSync(uploadPath, file.buffer);
@@ -70,7 +70,7 @@ export class ProductController {
     } catch (error) {
       // Supprimer les fichiers déjà enregistrés en cas d'erreur
       uploadedFilePaths.forEach((filePath) => {
-        const fullPath = path.join('./uploads', filePath);
+        const fullPath = path.join('./tmp/uploads', filePath);
         if (fs.existsSync(fullPath)) {
           fs.unlinkSync(fullPath);
         }
@@ -113,7 +113,7 @@ export class ProductController {
   @UseInterceptors(
     FilesInterceptor('images', 5, {
       storage: diskStorage({
-        destination: './uploads', // Le dossier où les fichiers seront stockés
+        destination: './', // Le dossier où les fichiers seront stockés
         filename: (req, file, cb) => {
           const uniqueSuffix = uuidv4() + extname(file.originalname);
           cb(null, uniqueSuffix); // Nom unique généré pour chaque fichier

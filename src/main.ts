@@ -18,7 +18,7 @@ async function bootstrap() {
     }),
   );
 
-  app.use(express.static(join(process.cwd(), './uploads')));
+  app.use(express.static(join(process.cwd(), './tmp/uploads')));
 
   // Cookie parser
   app.use(cookieParser());
