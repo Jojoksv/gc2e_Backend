@@ -10,10 +10,7 @@ import { RateLimiterMemory } from 'rate-limiter-flexible';
 import { compare, hash } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { UpdateUserDto } from '../../dtos/updateUserDTO';
-<<<<<<< HEAD
-=======
 import * as brevo from '@getbrevo/brevo';
->>>>>>> fa80b37 (Setting email)
 
 const limiter = new RateLimiterMemory({
   points: 5,
