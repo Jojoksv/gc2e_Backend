@@ -1,16 +1,21 @@
 import dotenv from 'dotenv';
 import Brevo from 'sib-api-v3-sdk';
 dotenv.config();
+import debug from 'debug';
 
 const defaultClient = Brevo.ApiClient.instance;
 
-// Vérifier si l'objet authentications existe
+const log = debug('app:init');
+log("Début de l'initialisation de l'API Key...");
+
 if (defaultClient.authentications && defaultClient.authentications['api-key']) {
-  console.log(defaultClient.authentications, defaultClient.authentications['api-key'])
+  log("API Key trouvée : ", defaultClient.authentications['api-key']);
   defaultClient.authentications['api-key'].apiKey = process.env.BREVO_API_KEY2;
+  log("API Key assignée avec succès.");
 } else {
-  console.error("Erreur: Impossible d'initialiser l'API Key.");
+  log("Erreur: Impossible d'initialiser l'API Key.");
 }
+
 
 // Création de l'instance API
 const apiInstance = new Brevo.TransactionalEmailsApi();
