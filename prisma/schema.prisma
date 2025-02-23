@@ -17,6 +17,22 @@ model User {
   city           String?
   address        String?
   additionalInfo String?
+  confirmed      Boolean @default(false) // Ajout de la confirmation
+  createdAt      DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  tokens Token[] // Relation avec les tokens
+}
+
+model Token {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  used      Boolean  @default(false) // Indique si le token a été utilisé
+  createdAt DateTime @default(now()) // Permet de vérifier s’il est expiré
+
+  @@index([userId]) // Optimise les requêtes par utilisateur
 }
 
 model Product {

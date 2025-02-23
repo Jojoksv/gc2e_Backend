@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -10,28 +11,42 @@ import { RateLimiterMemory } from 'rate-limiter-flexible';
 import { compare, hash } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { UpdateUserDto } from '../../dtos/updateUserDTO';
-import * as brevo from '@getbrevo/brevo';
+import sendEmail from './email.service.js';
+
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 const limiter = new RateLimiterMemory({
   points: 5,
   duration: 10,
 });
 
-// const client = new brevo.TransactionalEmailsApi();
-// client.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY2);
-
-// const client = new brevo.ApiClient();
-
-const client = new brevo.TransactionalEmailsApi();
-client.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY2);
-
-
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
-  ) {}
+  ) {
+      // Planifie une tâche qui s'exécute toutes les heures
+      cron.schedule('0 * * * *', async () => {
+        console.log('🕒 Vérification des comptes non confirmés...');
+        await this.cleanUpUnconfirmedAccounts();
+      });
+    }
+  
+  async cleanUpUnconfirmedAccounts() {
+    const now = new Date();
+    const threshold = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+    const deletedUsers = await this.prisma.user.deleteMany({
+      where: {
+        confirmed: false,
+        createdAt: { lt: threshold },
+      },
+    });
+
+    console.log(`🗑️ ${deletedUsers.count} comptes supprimés`);
+  }
 
   async login({ loginData }) {
     try {
@@ -68,41 +83,51 @@ export class AuthService {
   }
 
   async register({ registerData }: { registerData: CreateUser }) {
-    const { email, name, password } = registerData;
+      const { email, name, password } = registerData;
 
-    const existingUser = await this.prisma.user.findUnique({
-      where: {
-        email: email,
-      },
-    });
+      const existingUser = await this.prisma.user.findUnique({
+          where: { email },
+      });
 
-    if (existingUser) {
-      throw new ConflictException('Identifiants invalides');
+      if (existingUser) {
+          throw new ConflictException('Identifiants invalides');
+      }
+
+      const hashPassword = await this.hashPassword({ password });
+
+      const createdUser = await this.prisma.user.create({
+          data: { email, name, password: hashPassword },
+      });
+
+      const token = this.authenticateUser({ userId: createdUser.id, role: 'user' });
+
+      // Vérifier si l'email est bien envoyé
+      const emailSent = await sendEmail(name, email, token );
+      if (!emailSent) {
+          console.error("Échec de l'envoi de l'email, l'utilisateur a été créé mais sans confirmation.");
+      }
+
+      try {
+        // Hacher le token avant de l'enregistrer
+        const hashedToken = await this.hashToken({ token });
+
+        // Enregistrer le token dans la table Token
+        await this.prisma.token.create({
+            data: {
+                token: hashedToken,    // Le token haché
+                userId: createdUser.id,  // Associer le token à l'utilisateur créé
+                used: false,  // Le token n'a pas encore été utilisé
+            },
+        });
+    } catch (error) {
+        console.error("Erreur lors de l'enregistrement du token:", error);
     }
 
-    const hashPassword = await this.hashPassword({ password });
+      return token;
+  }
 
-    const createdUser = await this.prisma.user.create({
-      data: {
-        email,
-        name,
-        password: hashPassword,
-      },
-    });
-
-    (async () => {
-      const result = await this.sendEmail(name, email);
-      if(result){
-          return { message: 'Email enregistré. Vous allez recevoir un email de confirmation de la structure organisatrice, ESMT BURKINA!' }
-      } else {
-          return { message: 'Erreur durant la soumission du formulaire' }
-      };
-  })();
-
-    return this.authenticateUser({
-      userId: createdUser.id,
-      role: 'user',
-    });
+  private async hashToken({ token }: { token: any }) {
+    return await hash(token, 10);
   }
 
   private async hashPassword({ password }: { password: string }) {
@@ -141,63 +166,47 @@ export class AuthService {
     });
   }
 
-  sendEmail = async (name: string, email: string): Promise<boolean> => {
+  async updateUserConfirmation(userId: string, confirmed: boolean) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { confirmed: confirmed },
+    });
+  }
 
-    const emailContent: string = `
-        <html lang="fr">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Confirmation d'inscription</title>
-            </head>
-            <body>
-                <h2>Confirmation d'inscription</h2>
-                <p>Cher(e) ${name},</p>
-                <p>Votre inscription a bien été enregistrée. Veuillez s'il vous plait cliquer sur oui pour confirmer votre inscription de façon définitive.</p>
-                
-                <div class="mt-6 text-center text-sm text-gray-500">
-                    <p>Merci de votre confiance.</p>
-                    <p>© 2024 {{ params.sender }}. Tous droits réservés.</p>
-                </div>
-            </body>
-        </html>
-    `;
+  async validateToken(token: string, userId: string): Promise<boolean> {
 
-    interface SendEmailParams {
-        name: string;
-        email: string;
-        subject: string;
-        content: string;
+    const tokenRecord = await this.prisma.token.findUnique({
+      where: { userId },
+    });
+
+    if (!tokenRecord) throw new BadRequestException('Utilisateur non trouvé');
+
+    
+    const isTokenSame = await this.isPasswordValid({
+      token,
+      hashPassword: tokenRecord.token,
+    });
+
+    if (!isTokenSame) {
+      throw new UnauthorizedException('Identifiants invalides');
+    }
+    
+    const now = new Date();
+    const tokenAge = (now.getTime() - tokenRecord.createdAt.getTime()) / (1000 * 60);
+
+    if (tokenRecord.used || tokenAge > 15) {
+      await this.prisma.token.delete({ where: { id: tokenRecord.id } });
+      throw new BadRequestException('Token expiré ou déjà utilisé');
     }
 
-    const sendEmailToME = async ({ name, email, subject, content }: SendEmailParams): Promise<boolean> => {
-        try {
-            const response = await client.transactionalEmailsApi({
-                sender: { name: process.env.USER_NAME, email: process.env.USER_EMAIL },
-                to: [{ email: email, name: name }],
-                htmlContent: content,
-                subject: subject,
-                params: { sender: process.env.USER_NAME },
-            });
-            return true;
-        } catch (error) {
-            console.error("Email sending error:", error);
-            return false;
-        }
-    };
+    // Marquer le token comme utilisé
+    await this.prisma.token.update({
+      where: { id: tokenRecord.id },
+      data: { used: true },
+    });
 
-    const subject: string = "Confirmation d'inscription !";
-
-    // Envoi de l'email avec les détails des utilisateurs
-    const result: boolean = await sendEmailToME({ name: name, email: email, subject, content: emailContent });
-
-    if (result) {
-        console.log("Email envoyé avec succès !");
-    } else {
-        console.error("Erreur lors de l'envoi de l'email !");
-    }
-
-    return result;
-};
+    return true;
+  }
 
 }
+

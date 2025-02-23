@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  NotFoundException,
   Post,
   Put,
   Req,
@@ -19,6 +20,7 @@ import { RateLimit } from 'nestjs-rate-limiter';
 import { LoginDto } from '../../dtos/loginDTO';
 import { Logger } from '@nestjs/common';
 import { UpdateUserDto } from '../../dtos/updateUserDTO';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
@@ -64,8 +66,8 @@ export class AuthController {
 
     res.cookie('access_token', access_token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'DEV',
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'PROD' ? true : false,
+      sameSite: process.env.NODE_ENV === 'PROD' ? 'none' : 'lax',
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
 
@@ -99,5 +101,27 @@ export class AuthController {
 
     // Mise à jour des informations utilisateur
     return await this.authService.updateUser(userId, updateData);
+  }
+
+  @UseGuards(AuthGuard('jwt-body'))
+  @Post('confirm-subscription')
+  async confirmSubscription(@Req() req: any, @Body() body: { token: string, confirmed: boolean }) {
+
+    const userId = req.user.userId;
+
+    const tokenIsValid = await this.authService.validateToken(body.token, userId);
+    if (!tokenIsValid) {
+      throw new UnauthorizedException('Token invalide ou expiré');
+    }
+
+    const user = await this.userService.getUser({ userId });
+
+    if (!user) {
+      throw new NotFoundException('Utilisateur non trouvé');
+    }
+
+    await this.authService.updateUserConfirmation(userId, body.confirmed);
+
+    return { message: 'Confirmation mise à jour' };
   }
 }

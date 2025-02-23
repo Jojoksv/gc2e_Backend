@@ -21,6 +21,7 @@
     "types": ["node", "jest", "estree", "ws"],
     "paths": {
       "src/*": ["./src/*"]
-    }
+    },
+    "allowJs": true,
   }
 }
