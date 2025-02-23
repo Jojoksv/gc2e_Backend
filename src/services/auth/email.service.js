@@ -6,6 +6,7 @@ const defaultClient = Brevo.ApiClient.instance;
 
 // Vérifier si l'objet authentications existe
 if (defaultClient.authentications && defaultClient.authentications['api-key']) {
+  console.log(defaultClient.authentications, defaultClient.authentications['api-key'])
   defaultClient.authentications['api-key'].apiKey = process.env.BREVO_API_KEY2;
 } else {
   console.error("Erreur: Impossible d'initialiser l'API Key.");
