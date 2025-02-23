@@ -12,8 +12,9 @@ import { compare, hash } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { UpdateUserDto } from '../../dtos/updateUserDTO';
 import sendEmail from './email.service.js';
-
+import * as cron from 'node-cron';
 import * as dotenv from 'dotenv';
+
 dotenv.config();
 
 const limiter = new RateLimiterMemory({
@@ -144,6 +145,13 @@ export class AuthService {
     return compare(password, hashPassword);
   }
 
+  private isTokenValid({
+    token,
+    hashPassword,
+  }) {
+    return compare(token, hashPassword);
+  }
+
   private authenticateUser({ userId, role }: UserPayload) {
     const payload: UserPayload = { userId, role };
     return {
@@ -175,14 +183,14 @@ export class AuthService {
 
   async validateToken(token: string, userId: string): Promise<boolean> {
 
-    const tokenRecord = await this.prisma.token.findUnique({
+    const tokenRecord = await this.prisma.token.findFirst({
       where: { userId },
     });
 
     if (!tokenRecord) throw new BadRequestException('Utilisateur non trouvé');
 
     
-    const isTokenSame = await this.isPasswordValid({
+    const isTokenSame = await this.isTokenValid({
       token,
       hashPassword: tokenRecord.token,
     });
