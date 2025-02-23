@@ -1,10 +1,27 @@
-import * as brevo from '@getbrevo/brevo';
+// import * as brevo from '@getbrevo/brevo';
+import dotenv from 'dotenv';
+import Brevo from 'sib-api-v3-sdk';
+dotenv.config();
 
-const client = new brevo.TransactionalEmailsApi();
-client.setApiKey(
-  brevo.TransactionalEmailsApiApiKeys.apiKey,
-  process.env.BREVO_API_KEY2
-);
+// const client = new brevo.TransactionalEmailsApi();
+// client.setApiKey(
+//   brevo.TransactionalEmailsApiApiKeys.apiKey,
+//   process.env.BREVO_API_KEY2
+// );
+// const client = new brevo.TransactionalEmailsApi();
+// client.authentications.apiKey.apiKey = process.env.BREVO_API_KEY2;
+
+const defaultClient = Brevo.ApiClient.instance;
+
+// Vérifier si l'objet authentications existe avant d'y accéder
+if (!defaultClient.authentications || !defaultClient.authentications['api-key']) {
+    console.error("Erreur: L'objet client.authentications['api-key'] est indéfini.");
+} else {
+    defaultClient.authentications['api-key'].apiKey = process.env.BREVO_API_KEY2;
+}
+
+// Création de l'instance API
+const apiInstance = new Brevo.TransactionalEmailsApi();
 
 export default async function sendEmail(name, email, access_token) {
     const backendUrl = `${process.env.BACKEND_URL}/auth/confirm-subscription`;
@@ -110,7 +127,7 @@ export default async function sendEmail(name, email, access_token) {
   
     const sendEmailToME = async (name, email, subject, content) => {
       try {
-        const response = await client.sendTransacEmail({
+        const response = await apiInstance.sendTransacEmail({
           sender: { name: process.env.USER_NAME, email: process.env.USER_EMAIL },
           to: [{ email, name }],
           htmlContent: content,

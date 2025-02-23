@@ -107,6 +107,7 @@ export class AuthController {
   @Post('confirm-subscription')
   async confirmSubscription(@Req() req: any, @Body() body: { token: string, confirmed: boolean }) {
 
+    console.log(req);
     const userId = req.user.userId;
 
     const tokenIsValid = await this.authService.validateToken(body.token, userId);

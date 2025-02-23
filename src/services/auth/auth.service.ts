@@ -103,14 +103,14 @@ export class AuthService {
       const token = this.authenticateUser({ userId: createdUser.id, role: 'user' });
 
       // Vérifier si l'email est bien envoyé
-      const emailSent = await sendEmail(name, email, token );
+      const emailSent = await sendEmail(name, email, token.access_token );
       if (!emailSent) {
           console.error("Échec de l'envoi de l'email, l'utilisateur a été créé mais sans confirmation.");
       }
 
       try {
         // Hacher le token avant de l'enregistrer
-        const hashedToken = await this.hashToken({ token });
+        const hashedToken = await this.hashToken({ token: token.access_token });
 
         // Enregistrer le token dans la table Token
         await this.prisma.token.create({
