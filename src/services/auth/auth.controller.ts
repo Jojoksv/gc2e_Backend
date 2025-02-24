@@ -107,47 +107,46 @@ export class AuthController {
   }
 
   @Get('confirm-subscription')
-@UseGuards(AuthGuard('jwt-body'))
-async confirmSubscription(
-  @Request() req: any,
-  @Query('token') token: string,
-  @Query('confirmed') confirmed: boolean,
-  @Res() res: any
-): Promise<string> {
-  try {
-    console.log('[CONFIRM SUBSCRIPTION] Requête reçue avec :', { token, confirmed });
+  @UseGuards(AuthGuard('jwt-body'))
+  async confirmSubscription(
+    @Request() req: any,
+    @Query('token') token: string,
+    @Query('confirmed') confirmed: boolean,
+    @Res() res: any
+  ): Promise<string> {
+    try {
+      console.log('[CONFIRM SUBSCRIPTION] Requête reçue avec :', { token, confirmed });
 
-    const userId = req.user.userId;
-    console.log('[CONFIRM SUBSCRIPTION] Utilisateur authentifié avec userId:', userId);
+      const userId = req.user.userId;
+      console.log('[CONFIRM SUBSCRIPTION] Utilisateur authentifié avec userId:', userId);
 
-    // Vérifier la validité du token
-    const tokenIsValid = await this.authService.validateToken(token, userId);
-    console.log('[CONFIRM SUBSCRIPTION] Token valide:', tokenIsValid);
+      // Vérifier la validité du token
+      const tokenIsValid = await this.authService.validateToken(token, userId);
+      console.log('[CONFIRM SUBSCRIPTION] Token valide:', tokenIsValid);
 
-    if (!tokenIsValid) {
-      console.error('[CONFIRM SUBSCRIPTION] Token invalide ou expiré.');
-      throw new UnauthorizedException('Token invalide ou expiré');
+      if (!tokenIsValid) {
+        console.error('[CONFIRM SUBSCRIPTION] Token invalide ou expiré.');
+        throw new UnauthorizedException('Token invalide ou expiré');
+      }
+
+      // Vérifier si l'utilisateur existe
+      const user = await this.userService.getUser({ userId });
+      if (!user) {
+        console.error('[CONFIRM SUBSCRIPTION] Utilisateur non trouvé:', userId);
+        throw new NotFoundException('Utilisateur non trouvé');
+      }
+
+      console.log('[CONFIRM SUBSCRIPTION] Utilisateur trouvé:', user);
+
+      // Mettre à jour la confirmation
+      await this.authService.updateUserConfirmation(userId, confirmed);
+      console.log('[CONFIRM SUBSCRIPTION] Confirmation mise à jour pour userId:', userId);
+
+      return res.json({ message: 'Inscription Confirmée, merci à vous !' });
+
+    } catch (error) {
+      console.error('[CONFIRM SUBSCRIPTION] Erreur:', error.message);
+      throw error;
     }
-
-    // Vérifier si l'utilisateur existe
-    const user = await this.userService.getUser({ userId });
-    if (!user) {
-      console.error('[CONFIRM SUBSCRIPTION] Utilisateur non trouvé:', userId);
-      throw new NotFoundException('Utilisateur non trouvé');
-    }
-
-    console.log('[CONFIRM SUBSCRIPTION] Utilisateur trouvé:', user);
-
-    // Mettre à jour la confirmation
-    await this.authService.updateUserConfirmation(userId, confirmed);
-    console.log('[CONFIRM SUBSCRIPTION] Confirmation mise à jour pour userId:', userId);
-
-    return res.json({ message: 'Inscription Confirmée, merci à vous !' });
-
-  } catch (error) {
-    console.error('[CONFIRM SUBSCRIPTION] Erreur:', error.message);
-    throw error;
   }
-}
-
 }

@@ -234,8 +234,7 @@ export class AuthService {
       console.error('[VALIDATE TOKEN] Erreur:', error.message);
       throw error;
     }
-  }
-  
+  }  
 
 }
 

@@ -9,12 +9,13 @@ export class JwtBodyStrategy extends PassportStrategy(Strategy, 'jwt-body') {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
-          // Vérifie dans `query`, `body`, puis `Authorization`
-          return (
+          const token =
             request?.query?.token || 
             request?.body?.token || 
-            request?.headers?.authorization?.replace('Bearer ', '')
-          );
+            request?.headers?.authorization?.replace('Bearer ', '');
+          
+          console.log('[JWT STRATEGY] Token extrait:', token);
+          return token;
         },
       ]),
       secretOrKey: process.env.JWT_SECRET,
@@ -22,9 +23,14 @@ export class JwtBodyStrategy extends PassportStrategy(Strategy, 'jwt-body') {
   }
 
   async validate(payload: any) {
-    if (!payload) {
+    console.log('[JWT STRATEGY] Payload reçu:', payload);
+
+    if (!payload || !payload.userId) {
+      console.error('[JWT STRATEGY] Erreur: Payload invalide ou userId manquant.');
       throw new UnauthorizedException();
     }
-    return { userId: payload.sub }; // Retourne l'ID utilisateur
+
+    console.log('[JWT STRATEGY] Utilisateur validé avec userId:', payload.userId);
+    return { userId: payload.userId }; // Vérifie que `userId` est bien transmis
   }
 }
