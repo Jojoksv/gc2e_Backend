@@ -7,7 +7,9 @@ import {
   NotFoundException,
   Post,
   Put,
+  Query,
   Req,
+  Request,
   Res,
   UnauthorizedException,
   UseGuards,
@@ -60,18 +62,19 @@ export class AuthController {
   @RateLimit({ points: 5, duration: 10 })
   async register(
     @Body() registerData: CreateUser,
-    @Res({ passthrough: true }) res: any,
+    // @Res({ passthrough: true }) res: any,
   ) {
-    const { access_token } = await this.authService.register({ registerData });
+    // const { access_token } = await this.authService.register({ registerData });
 
-    res.cookie('access_token', access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'PROD' ? true : false,
-      sameSite: process.env.NODE_ENV === 'PROD' ? 'none' : 'lax',
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-    });
+    // res.cookie('access_token', access_token, {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === 'PROD' ? true : false,
+    //   sameSite: process.env.NODE_ENV === 'PROD' ? 'none' : 'lax',
+    //   maxAge: 30 * 24 * 60 * 60 * 1000,
+    // });
 
-    return res.send({ message: 'Inscription réussie !' });
+    // return res.send({ message: 'Inscription réussie !' });
+    return await this.authService.register({ registerData });
   }
 
   @UseGuards(JwtAuthGuard)
@@ -103,14 +106,13 @@ export class AuthController {
     return await this.authService.updateUser(userId, updateData);
   }
 
-  @UseGuards(AuthGuard('jwt-body'))
   @Post('confirm-subscription')
-  async confirmSubscription(@Req() req: any, @Body() body: { token: string, confirmed: boolean }) {
+  @UseGuards(AuthGuard('jwt-body'))
+  async confirmSubscription(@Request() req: any, @Query('token') token: string, @Query('confirmed') confirmed: boolean, @Res() res: any): Promise<string> {
 
-    console.log(req);
     const userId = req.user.userId;
 
-    const tokenIsValid = await this.authService.validateToken(body.token, userId);
+    const tokenIsValid = await this.authService.validateToken(token, userId);
     if (!tokenIsValid) {
       throw new UnauthorizedException('Token invalide ou expiré');
     }
@@ -121,8 +123,8 @@ export class AuthController {
       throw new NotFoundException('Utilisateur non trouvé');
     }
 
-    await this.authService.updateUserConfirmation(userId, body.confirmed);
+    await this.authService.updateUserConfirmation(userId, confirmed);
 
-    return { message: 'Confirmation mise à jour' };
+    return res.json({ message: 'Incription Confirmée, merci à vous !' });
   }
 }

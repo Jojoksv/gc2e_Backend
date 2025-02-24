@@ -39,7 +39,7 @@ model Product {
   id        String      @id @default(cuid())
   name      String      @unique
   price     Float
-  oldPrice  Float
+  oldPrice  Float?
   category  String
   rating    Int
   reviews   Int

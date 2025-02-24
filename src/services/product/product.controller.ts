@@ -44,6 +44,7 @@ export class ProductController {
     @UploadedFiles() files: Express.Multer.File[],
     @Body() createProductDto: CreateProductDto,
   ) {
+    console.log(files, createProductDto);
     // Étape 1 : Validation de la DTO
     const errors = await this.validateDto(createProductDto);
     if (errors.length > 0) {

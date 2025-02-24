@@ -35,19 +35,20 @@ export class AuthService {
       });
     }
   
-  async cleanUpUnconfirmedAccounts() {
-    const now = new Date();
-    const threshold = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-
-    const deletedUsers = await this.prisma.user.deleteMany({
-      where: {
-        confirmed: false,
-        createdAt: { lt: threshold },
-      },
-    });
-
-    console.log(`🗑️ ${deletedUsers.count} comptes supprimés`);
-  }
+    async cleanUpUnconfirmedAccounts() {
+      const now = new Date();
+      const threshold = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    
+      const deletedUsers = await this.prisma.user.deleteMany({
+        where: {
+          confirmed: false,
+          createdAt: { lt: threshold },
+          role: { not: "admin" },
+        },
+      });
+    
+      console.log(`🗑️ ${deletedUsers.count} comptes supprimés`);
+    }    
 
   async login({ loginData }) {
     try {
@@ -124,7 +125,7 @@ export class AuthService {
         console.error("Erreur lors de l'enregistrement du token:", error);
     }
 
-      return token;
+    return { message: "Inscription réussie" };
   }
 
   private async hashToken({ token }: { token: any }) {

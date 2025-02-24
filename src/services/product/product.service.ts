@@ -21,7 +21,7 @@ export class ProductService {
     const {
       name,
       price,
-      oldPrice,
+      oldPrice = 0,
       category,
       rating = 0,
       reviews = 0,
