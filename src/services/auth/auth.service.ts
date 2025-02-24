@@ -183,39 +183,59 @@ export class AuthService {
   }
 
   async validateToken(token: string, userId: string): Promise<boolean> {
-
-    const tokenRecord = await this.prisma.token.findFirst({
-      where: { userId },
-    });
-
-    if (!tokenRecord) throw new BadRequestException('Utilisateur non trouvé');
-
-    
-    const isTokenSame = await this.isTokenValid({
-      token,
-      hashPassword: tokenRecord.token,
-    });
-
-    if (!isTokenSame) {
-      throw new UnauthorizedException('Identifiants invalides');
+    try {
+      console.log('[VALIDATE TOKEN] Vérification du token pour userId:', userId);
+  
+      // Récupérer le token en base de données
+      const tokenRecord = await this.prisma.token.findFirst({
+        where: { userId },
+      });
+  
+      if (!tokenRecord) {
+        console.error('[VALIDATE TOKEN] Aucun token trouvé pour userId:', userId);
+        throw new BadRequestException('Utilisateur non trouvé');
+      }
+  
+      console.log('[VALIDATE TOKEN] Token trouvé:', tokenRecord);
+  
+      // Comparer le token fourni avec celui stocké
+      const isTokenSame = await this.isTokenValid({
+        token,
+        hashPassword: tokenRecord.token,
+      });
+  
+      if (!isTokenSame) {
+        console.error('[VALIDATE TOKEN] Token invalide pour userId:', userId);
+        throw new UnauthorizedException('Identifiants invalides');
+      }
+  
+      // Vérifier l'expiration du token
+      const now = new Date();
+      const tokenAge = (now.getTime() - tokenRecord.createdAt.getTime()) / (1000 * 60);
+      console.log('[VALIDATE TOKEN] Âge du token (minutes):', tokenAge);
+  
+      if (tokenRecord.used || tokenAge > 15) {
+        console.warn('[VALIDATE TOKEN] Token expiré ou déjà utilisé pour userId:', userId);
+  
+        await this.prisma.token.delete({ where: { id: tokenRecord.id } });
+        throw new BadRequestException('Token expiré ou déjà utilisé');
+      }
+  
+      // Marquer le token comme utilisé
+      await this.prisma.token.update({
+        where: { id: tokenRecord.id },
+        data: { used: true },
+      });
+  
+      console.log('[VALIDATE TOKEN] Token validé et marqué comme utilisé pour userId:', userId);
+      return true;
+  
+    } catch (error) {
+      console.error('[VALIDATE TOKEN] Erreur:', error.message);
+      throw error;
     }
-    
-    const now = new Date();
-    const tokenAge = (now.getTime() - tokenRecord.createdAt.getTime()) / (1000 * 60);
-
-    if (tokenRecord.used || tokenAge > 15) {
-      await this.prisma.token.delete({ where: { id: tokenRecord.id } });
-      throw new BadRequestException('Token expiré ou déjà utilisé');
-    }
-
-    // Marquer le token comme utilisé
-    await this.prisma.token.update({
-      where: { id: tokenRecord.id },
-      data: { used: true },
-    });
-
-    return true;
   }
+  
 
 }
 
