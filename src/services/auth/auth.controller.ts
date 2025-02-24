@@ -106,7 +106,7 @@ export class AuthController {
     return await this.authService.updateUser(userId, updateData);
   }
 
-  @GET('confirm-subscription')
+  @Get('confirm-subscription')
   @UseGuards(AuthGuard('jwt-body'))
   async confirmSubscription(@Request() req: any, @Query('token') token: string, @Query('confirmed') confirmed: boolean, @Res() res: any): Promise<string> {
 
