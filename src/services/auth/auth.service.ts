@@ -214,7 +214,7 @@ export class AuthService {
       const tokenAge = (now.getTime() - tokenRecord.createdAt.getTime()) / (1000 * 60);
       console.log('[VALIDATE TOKEN] Âge du token (minutes):', tokenAge);
   
-      if (tokenRecord.used || tokenAge > 15) {
+      if (tokenRecord.used || tokenAge > 45) {
         console.warn('[VALIDATE TOKEN] Token expiré ou déjà utilisé pour userId:', userId);
   
         await this.prisma.token.delete({ where: { id: tokenRecord.id } });
