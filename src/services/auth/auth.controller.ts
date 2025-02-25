@@ -7,6 +7,7 @@ import {
   NotFoundException,
   Post,
   Put,
+  Patch,
   Query,
   Req,
   Request,
@@ -90,21 +91,24 @@ export class AuthController {
   async updateUser(@Req() req: any, @Body() updateData: UpdateUserDto) {
     const userId = req.user.userId;
 
-    // Récupérer les infos actuelles de l'utilisateur
+    // Récupérer les infos actuelles de l'utilisateur qui fait la requête
     const currentUser = await this.userService.getUser({ userId });
 
     if (!currentUser) {
       throw new UnauthorizedException("Utilisateur non trouvé.");
     }
 
-    // Vérifier que l'email et le rôle envoyés correspondent à l'utilisateur actuel
-    if (updateData.email !== currentUser.email || updateData.role !== currentUser.role) {
-      throw new UnauthorizedException("Vous ne pouvez pas modifier l'email ou le rôle.");
+    // Vérifier si l'utilisateur qui fait la requête est un admin
+    const isAdmin = currentUser.role === 'admin';
+
+    // Si ce n'est pas un admin et qu'il essaie de modifier un rôle, on l'empêche
+    if (!isAdmin && updateData.role !== currentUser.role) {
+      throw new UnauthorizedException("Vous ne pouvez pas modifier votre propre rôle.");
     }
 
-    // Mise à jour des informations utilisateur
-    return await this.authService.updateUser(userId, updateData);
-  }
+    // Mise à jour des informations utilisateur (admin peut modifier le rôle des autres)
+    return await this.authService.updateUser(updateData.id, updateData);
+}
 
   @Get('confirm-subscription')
   @UseGuards(AuthGuard('jwt-body'))
