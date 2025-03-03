@@ -112,7 +112,7 @@ export class ProductService {
     const {
       name,
       price,
-      oldPrice,
+      oldPrice = 0,
       category,
       rating = 0,
       reviews = 0,
@@ -140,7 +140,7 @@ export class ProductService {
           reviews,
           description,
           features,
-          images: { set: images },
+          images: images,
         },
       });
 

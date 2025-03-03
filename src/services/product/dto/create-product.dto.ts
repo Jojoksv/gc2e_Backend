@@ -56,9 +56,13 @@ export class CreateProductDto {
   )
   category: string;
 
-  rating: number;
+  @IsNumber()
+  @IsOptional()
+  rating?: number;
 
-  reviews: number;
+  @IsNumber()
+  @IsOptional()
+  reviews?: number;
 
   @IsString()
   @IsNotEmpty({ message: 'La description est obligatoire.' })
@@ -86,8 +90,9 @@ export class CreateProductDto {
   })
   features: string[];
 
-  @IsOptional()
-  @IsFile()
-  @HasMimeType(['image/jpeg', 'image/png', 'image/jpg'])
-  images?: any;
+  @IsArray()
+  @IsFile({ each: true })
+  @HasMimeType(['image/jpeg', 'image/png', 'image/jpg'], { each: true })
+  images: any[];
+
 }

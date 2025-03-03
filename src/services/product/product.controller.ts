@@ -110,42 +110,181 @@ export class ProductController {
   //   return this.productService.update(id, updateProductDto);
   // }
 
-  @Put(':id')
-  @UseInterceptors(
-    FilesInterceptor('images', 5, {
-      storage: diskStorage({
-        destination: './', // Le dossier où les fichiers seront stockés
-        filename: (req, file, cb) => {
-          const uniqueSuffix = uuidv4() + extname(file.originalname);
-          cb(null, uniqueSuffix); // Nom unique généré pour chaque fichier
-        },
-      }),
-      fileFilter: (req, file, cb) => {
-        const allowedTypes = /jpeg|jpg|png/;
-        const ext = allowedTypes.test(extname(file.originalname).toLowerCase());
-        const mime = allowedTypes.test(file.mimetype);
+  // @Put(':id')
+  // @UseInterceptors(
+  // FilesInterceptor('images', 5, {
+  //   storage: diskStorage({
+  //     destination: './tmp/uploads', // Définis un chemin de stockage
+  //     filename: (req, file, cb) => {
+  //       const uniqueSuffix = uuidv4() + extname(file.originalname);
+  //       cb(null, uniqueSuffix); // Génération d’un nom de fichier unique
+  //     },
+  //   }),
+  //   fileFilter: (req, file, cb) => {
+  //     const allowedTypes = /jpeg|jpg|png/;
+  //     const ext = allowedTypes.test(extname(file.originalname).toLowerCase());
+  //     const mime = allowedTypes.test(file.mimetype);
 
-        if (ext && mime) {
-          cb(null, true); // Fichier accepté
-        } else {
-          cb(new Error('Type de fichier non supporté'), false); // Fichier non accepté
-        }
+  //     if (ext && mime) {
+  //       cb(null, true);
+  //     } else {
+  //       cb(new Error('Type de fichier non supporté'), false);
+  //     }
+  //   },
+  // }),
+  // )
+  // async update(
+  // @Param('id') id: string,
+  // @Body() updateProductDto: UpdateProductDto,
+  // @UploadedFiles() files: Express.Multer.File[],
+  // ) {
+  // console.log('ID reçu:', id);
+  // console.log('Données reçues:', updateProductDto);
+  // console.log('Fichiers reçus:', files);
+
+  // // Vérification des fichiers uploadés
+  // const uploadedFilePaths: string[] = [];
+  // try {
+  //   // Récupérer les anciennes images du produit
+  //   const existingProduct = await this.productService.findOne(id);
+  //   const oldImages: string[] = existingProduct.data.images || [];
+
+  //   const uploadedFilePaths: string[] = [];
+
+  //   // Gérer les nouveaux fichiers uploadés
+  //   files.forEach((file) => {
+  //     const uniqueSuffix = uuidv4() + extname(file.originalname);
+  //     const newPath = path.join('./tmp/uploads', uniqueSuffix);
+
+  // fs.renameSync(file.path, newPath); // Renomme le fichier uploadé
+  //   uploadedFilePaths.push(uniqueSuffix);
+  // });
+
+  // // Identifier les fichiers à supprimer (anciens fichiers non présents dans uploadedFilePaths)
+  // const filesToDelete = oldImages.filter((img) => !uploadedFilePaths.includes(img));
+
+  // filesToDelete.forEach((file) => {
+  //   const filePath = path.join('./tmp/uploads', file);
+  //   if (fs.existsSync(filePath)) {
+  //     fs.unlinkSync(filePath); // Supprime le fichier obsolète
+  //   }
+  // });
+
+  // // Vérifier la validité de updateProductDto
+  // if (!updateProductDto || Object.keys(updateProductDto).length === 0) {
+  //   throw new BadRequestException('Les données de mise à jour sont vides.');
+  // }
+
+  // // Mettre à jour le produit avec les nouvelles données et images
+  // return await this.productService.update({
+  //   id,
+  //   updateProductDto,
+  //   images: uploadedFilePaths,
+  // });
+
+  // } catch (error) {
+  //   console.error("Erreur lors de l'update:", error);
+
+  //   // Suppression des fichiers en cas d'erreur
+  //   uploadedFilePaths.forEach((filePath) => {
+  //     const fullPath = path.join('./tmp/uploads', filePath);
+  //     if (fs.existsSync(fullPath)) {
+  //       fs.unlinkSync(fullPath);
+  //     }
+  //   });
+
+  //   throw new BadRequestException(
+  //     "Erreur lors de la mise à jour du produit",
+  //     error.message,
+  //   );
+  // }
+  // }
+
+  @Put(':id')
+@UseInterceptors(
+  FilesInterceptor('images', 5, {
+    storage: diskStorage({
+      destination: './tmp/uploads',
+      filename: (req, file, cb) => {
+        const uniqueSuffix = uuidv4() + extname(file.originalname);
+        cb(null, uniqueSuffix);
       },
     }),
-  )
-  update(
-    @Param('id') id: string,
-    @Body() updateProductDto: UpdateProductDto,
-    @UploadedFiles() files: Express.Multer.File[], // Capture les fichiers envoyés
-  ) {
-    const uploadedFilePaths: string[] = files.map((file) => file.filename);
+    fileFilter: (req, file, cb) => {
+      const allowedTypes = /jpeg|jpg|png/;
+      const ext = allowedTypes.test(extname(file.originalname).toLowerCase());
+      const mime = allowedTypes.test(file.mimetype);
 
-    return this.productService.update({
+      if (ext && mime) {
+        cb(null, true);
+      } else {
+        cb(new Error('Type de fichier non supporté'), false);
+      }
+    },
+  }),
+)
+async update(
+  @Param('id') id: string,
+  @Body() updateProductDto: UpdateProductDto,
+  @UploadedFiles() files: Express.Multer.File[],
+) {
+  console.log('ID reçu:', id);
+  console.log('Données reçues:', updateProductDto);
+  console.log('Fichiers reçus:', files);
+
+  try {
+    // 1️⃣ Récupérer l’ancien produit et ses images
+    const existingProduct = await this.productService.findOne(id);
+    const oldImages: string[] = existingProduct.data.images || [];
+
+    // 2️⃣ Récupérer les nouvelles images (celles déjà en base et celles envoyées)
+    const updatedImages = [...(updateProductDto.images || [])];
+
+    // 3️⃣ Ajouter les nouveaux fichiers uploadés
+    files.forEach((file) => {
+      updatedImages.push(file.filename); // On ajoute seulement le nom du fichier
+    });
+
+    // 4️⃣ Supprimer les images qui ne sont plus présentes
+    const filesToDelete = oldImages.filter((img) => !updatedImages.includes(img));
+
+    filesToDelete.forEach((file) => {
+      const filePath = path.join('./tmp/uploads', file);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    });
+
+    // 5️⃣ Vérification des données
+    if (!updateProductDto || Object.keys(updateProductDto).length === 0) {
+      throw new BadRequestException('Les données de mise à jour sont vides.');
+    }
+
+    // 6️⃣ Mise à jour du produit
+    return await this.productService.update({
       id,
       updateProductDto,
-      images: uploadedFilePaths,
+      images: updatedImages, // On enregistre toutes les images mises à jour
     });
+
+  } catch (error) {
+    console.error("Erreur lors de l'update:", error);
+
+    // Suppression des fichiers en cas d'erreur
+    files.forEach((file) => {
+      const filePath = path.join('./tmp/uploads', file.filename);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    });
+
+    throw new BadRequestException(
+      "Erreur lors de la mise à jour du produit",
+      error.message,
+    );
   }
+}
+
 
   @Delete(':id')
   remove(@Param('id') id: string) {
