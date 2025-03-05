@@ -14,11 +14,12 @@ import { UpdateUserDto } from '../../dtos/updateUserDTO';
 // import sendEmail from './email.service.js';
 import * as cron from 'node-cron';
 import * as dotenv from 'dotenv';
-
-dotenv.config();
 import Brevo from 'sib-api-v3-sdk';
 
 const defaultClient = Brevo.ApiClient.instance;
+const apiInstance = new Brevo.TransactionalEmailsApi();
+
+dotenv.config();
 
 console.log("Début de l'initialisation de l'API Key...");
   
@@ -32,7 +33,6 @@ console.log("Début de l'initialisation de l'API Key...");
   
   
   // Création de l'instance API
-  const apiInstance = new Brevo.TransactionalEmailsApi();
   
 
 
@@ -124,6 +124,26 @@ export class AuthService {
   }
 
   async register({ registerData }: { registerData: CreateUser }) {
+
+
+
+
+
+
+    console.log("API Key trouvée : ", defaultClient.authentications['api-key']);
+    defaultClient.authentications['api-key'].apiKey = process.env.BREVO_API_KEY2;
+    console.log("API Key assignée avec succès.");
+    console.log("Erreur: Impossible d'initialiser l'API Key.");
+
+
+
+
+
+
+
+
+
+
       const { email, name, password } = registerData;
 
       const existingUser = await this.prisma.user.findUnique({
