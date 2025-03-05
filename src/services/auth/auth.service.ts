@@ -16,26 +16,9 @@ import * as cron from 'node-cron';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
-
-
-
-
-
-
-
-
-
-
-
-
-// import dotenv from 'dotenv';
 import Brevo from 'sib-api-v3-sdk';
-// dotenv.config();
-// import debug from 'debug';
 
 const defaultClient = Brevo.ApiClient.instance;
-  
-// const log = debug('app:init');
 
 console.log("Début de l'initialisation de l'API Key...");
   
