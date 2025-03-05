@@ -22,13 +22,13 @@ const defaultClient = Brevo.ApiClient.instance;
 
 console.log("Début de l'initialisation de l'API Key...");
   
-  if (defaultClient.authentications && defaultClient.authentications['api-key']) {
+  // if (defaultClient.authentications && defaultClient.authentications['api-key']) {
     console.log("API Key trouvée : ", defaultClient.authentications['api-key']);
     defaultClient.authentications['api-key'].apiKey = process.env.BREVO_API_KEY2;
     console.log("API Key assignée avec succès.");
-  } else {
+  // } else {
     console.log("Erreur: Impossible d'initialiser l'API Key.");
-  }
+  // }
   
   
   // Création de l'instance API
