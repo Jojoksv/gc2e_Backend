@@ -130,8 +130,8 @@ export class AuthService {
 
 
 
-    console.log("API Key trouvée : ", defaultClient.authentications['api-key']);
     defaultClient.authentications['api-key'].apiKey = process.env.BREVO_API_KEY2;
+    console.log("API Key trouvée : ", defaultClient.authentications['api-key']);
     console.log("API Key assignée avec succès.");
     console.log("Erreur: Impossible d'initialiser l'API Key.");
 
